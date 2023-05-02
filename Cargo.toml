@@ -1,0 +1,18 @@
+[package]
+name = "kimchi-playground"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kimchi = { git = "https://github.com/o1-labs/proof-systems/" }
+mina-curves = { git = "https://github.com/o1-labs/proof-systems/" }
+
+[[bin]]
+name = "ex002_hash_poseidon"
+path = "src/ex002_hash_poseidon.rs"
+
+[[bin]]
+name = "ex001_addition"
+path = "src/ex001_addition.rs"
