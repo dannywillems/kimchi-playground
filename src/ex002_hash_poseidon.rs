@@ -72,7 +72,7 @@ fn main() {
             PI3 = O3  --------------------------------------|
 
                                 O1, O2 and O3 must be equal to PI1, PI2 and PI3
-                         */
+            */
             // The three first gates are the public inputs. We want to connect
             // them to the output of Poseidon.
             // When we initialise the public input, we always use the first
@@ -85,7 +85,6 @@ fn main() {
             gates[1].wires[0] = Wire { row, col: 1 };
             gates[2].wires[0] = Wire { row, col: 2 };
 
-            // Question: why row 0 and not 1 2 with same col?
             let poseidon_output = &mut gates[row].wires;
             poseidon_output[0] = Wire { row: 0, col: 0 };
             poseidon_output[1] = Wire { row: 1, col: 0 };
