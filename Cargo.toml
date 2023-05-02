@@ -10,9 +10,9 @@ kimchi = { git = "https://github.com/o1-labs/proof-systems/" }
 mina-curves = { git = "https://github.com/o1-labs/proof-systems/" }
 
 [[bin]]
-name = "ex002_hash_poseidon"
-path = "src/ex002_hash_poseidon.rs"
-
-[[bin]]
 name = "ex001_addition"
 path = "src/ex001_addition.rs"
+
+[[bin]]
+name = "ex002_hash_poseidon"
+path = "src/ex002_hash_poseidon.rs"
