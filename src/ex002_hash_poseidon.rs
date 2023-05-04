@@ -1,20 +1,27 @@
+use ark_poly::EvaluationDomain;
 use kimchi::circuits::constraints::ConstraintSystem;
 use kimchi::circuits::gate::CircuitGate;
-use kimchi::circuits::wires::Wire;
+use kimchi::circuits::polynomials;
+use kimchi::circuits::wires::{Wire, COLUMNS};
 use kimchi::circuits::{constraints, polynomials::generic::GenericGateSpec};
 
 // We must have this import for the trait defining sponge_params.
+use ark_ff::Zero;
 use kimchi::curve::KimchiCurve;
 use kimchi::mina_poseidon::poseidon::ArithmeticSpongeParams;
+use kimchi::poly_commitment::srs::{endos, SRS};
+use kimchi::precomputed_srs;
 use kimchi::prover_index::testing::new_index_for_test;
-use mina_curves::pasta::{Fp, Vesta};
-
-// Imported from kimchi-visu
+use kimchi::prover_index::ProverIndex;
+use mina_curves::pasta::{Fp, Fq, Pallas, Vesta};
+use std::array;
+use std::sync::Arc;
 
 fn main() {
+    let poseidon_state_size = 3;
     // The public inputs will be the output of a permutation of Poseidon.
     // We use a Poseidon instance of state 3.
-    let public = 3;
+    let public = poseidon_state_size;
     let poseidon_params = Vesta::sponge_params();
     let (gates, row) = {
         // We keep all the gates we create in a list.
@@ -92,9 +99,45 @@ fn main() {
         }
         (gates, row)
     };
+
+    // witness for Poseidon permutation custom constraints
+    let mut witness: [Vec<Fp>; COLUMNS] = array::from_fn(|_| vec![Fp::zero(); COLUMNS]);
+
+    // creates a random input
+    let input = [Fp::from(1u32), Fp::from(2u32), Fp::from(3u32)];
+
+    polynomials::poseidon::generate_witness(
+        poseidon_state_size,
+        Vesta::sponge_params(),
+        &mut witness,
+        input,
+    );
+
+    // No need to add lookup
     let cs = ConstraintSystem::<Fp>::create(gates)
         .public(public)
+        // .disable_gates_checks(disable_gates_checks)
         .build()
         .unwrap();
-    println!("{}");
+
+    println!("CS size: {}", cs.domain.d1.size());
+
+    // We create a SRS
+    let mut srs = SRS::<Vesta>::create(cs.domain.d1.size());
+    srs.add_lagrange_basis(cs.domain.d1);
+    // Boxing for parallel prover
+    let srs = Arc::new(srs);
+
+    let (endo_q, _endo_r): (Fp, Fq) = endos::<Pallas>();
+    let prover_index = ProverIndex::<Vesta>::create(cs, endo_q, srs);
+
+    let group_map = KimchiCurve::Map::setup();
+    let proof = ProverProof::create_recursive::<EFqSponge, EFrSponge>(
+        &group_map,
+        witness,
+        &self.0.runtime_tables,
+        &prover,
+        self.0.recursion,
+        None,
+    );
 }

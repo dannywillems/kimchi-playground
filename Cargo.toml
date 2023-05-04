@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 kimchi = { git = "https://github.com/o1-labs/proof-systems/" }
 mina-curves = { git = "https://github.com/o1-labs/proof-systems/" }
+ark-ff = "*"
+ark-poly = "*"
 
 [[bin]]
 name = "ex001_addition"
